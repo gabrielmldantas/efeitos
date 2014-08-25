@@ -1,5 +1,6 @@
 #include <opencv2/highgui/highgui.hpp>
-#include <iostream>
+#include "effects.h"
+#include <vector>
 using namespace cv;
 using namespace std;
 
@@ -9,18 +10,16 @@ int main(int argc, char* argv[])
     Size size(v.get(CV_CAP_PROP_FRAME_WIDTH), v.get(CV_CAP_PROP_FRAME_HEIGHT));
     double fps = v.get(CV_CAP_PROP_FPS);
     VideoWriter w("n.avi", CV_FOURCC('X', 'V', 'I', 'D'), fps, size);
+
+    vector<Effect*> effects;
+    effects.push_back(new Grayscale);
+
     Mat image;
     while (v.read(image)) {
-        for (int i = 0; i < image.rows; i++) {
-            for (int j = 0; j < image.cols; j++) {
-                Vec3b &pixel = image.at<Vec3b>(i, j);
-                int c = (pixel.val[0] + pixel.val[1] + pixel.val[2]) / 3;
-                pixel.val[0] = c;
-                pixel.val[1] = c;
-                pixel.val[2] = c;
-            }
-        }
+        for_each(effects.begin(), effects.end(), [&image](Effect* effect) { effect->apply(image); });
         w << image;
     }
+
+    for_each(effects.begin(), effects.end(), [](Effect* e) { delete e; });
     return 0;
 }
