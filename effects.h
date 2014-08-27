@@ -15,4 +15,8 @@ public:
     void apply(cv::Mat& image);
 };
 
+class Sepia : public Effect
+{
+    void apply(cv::Mat& image);
+};
 #endif
