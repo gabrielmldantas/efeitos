@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
 
     vector<Effect*> effects;
     effects.push_back(new Grayscale);
-    effects.push_back(new Sepia);
+    effects.push_back(new Threshold(255));
 
     Mat image;
     while (v.read(image)) {
