@@ -1,4 +1,5 @@
 #include "effects.h"
+#include <cstdlib>
 using namespace cv;
 
 void Grayscale::apply(Mat& image)
@@ -28,6 +29,18 @@ void Sepia::apply(Mat& image)
             pixel.val[0] = blue;
             pixel.val[1] = green;
             pixel.val[2] = red;
+        }
+    }
+}
+
+void Negative::apply(Mat& image)
+{
+    for (int i = 0; i < image.rows; i++) {
+        for (int j = 0; j < image.cols; j++) {
+            Vec3b& pixel = image.at<Vec3b>(i, j);
+            pixel.val[0] = abs(pixel.val[0] - 255);
+            pixel.val[1] = abs(pixel.val[1] - 255);
+            pixel.val[2] = abs(pixel.val[2] - 255);
         }
     }
 }
