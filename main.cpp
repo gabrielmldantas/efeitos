@@ -12,8 +12,7 @@ int main(int argc, char* argv[])
     VideoWriter w("n.avi", CV_FOURCC('X', 'V', 'I', 'D'), fps, size);
 
     vector<Effect*> effects;
-    effects.push_back(new Grayscale);
-    effects.push_back(new Threshold(255));
+    effects.push_back(new FiltroMedia(15));
 
     Mat image;
     while (v.read(image)) {

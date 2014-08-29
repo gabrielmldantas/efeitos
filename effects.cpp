@@ -1,9 +1,10 @@
 #include "effects.h"
 #include <cstdlib>
-using namespace cv;
-using namespace std;
+#include <cmath>
 
-void Effect::traverse(cv::Mat& image, function<void(Mat&, int, int)> transformation)
+using namespace cv;
+
+void Effect::traverse(Mat& image, std::function<void(Mat&, int, int)> transformation)
 {
     for (int i = 0; i < image.rows; i++) {
         for (int j = 0; j < image.cols; j++) {
@@ -69,3 +70,33 @@ void Threshold::apply(Mat& image)
     };
     traverse(image, f);
 }
+
+FiltroMedia::FiltroMedia(int maskSize)
+    : _maskSize(maskSize), _multiplier(1/(pow(maskSize, 2)))
+{
+}
+
+void FiltroMedia::apply(Mat& image)
+{
+    auto f = [this](Mat& image, int i, int j) {
+        Vec3b &pixel = image.at<Vec3b>(i, j);
+        int center = floor(_maskSize / 2);
+        Size imageSize = image.size();
+        Vec3f resultado(0, 0, 0);
+        for (int k = i - center; k < i + center; k++) {
+            if (k < 0 || k >= imageSize.height) continue;
+            for (int w = j - center; w < j + center; w++) {
+                if (w < 0 || w >= imageSize.width) continue;
+                Vec3b& vizinho = image.at<Vec3b>(k, w);
+                resultado.val[0] += vizinho.val[0] * _multiplier;
+                resultado.val[1] += vizinho.val[1] * _multiplier;
+                resultado.val[2] += vizinho.val[2] * _multiplier; 
+            }
+        }
+        pixel.val[0] = round(resultado.val[0]);
+        pixel.val[1] = round(resultado.val[1]);
+        pixel.val[2] = round(resultado.val[2]);
+    };
+    traverse(image, f);
+}
+

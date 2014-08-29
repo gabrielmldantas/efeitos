@@ -38,4 +38,14 @@ public:
 private:
     int _threshold;
 };
+
+class FiltroMedia : public Effect
+{
+public:
+    FiltroMedia(int maskSize);
+    void apply(cv::Mat& image);
+private:
+    float _multiplier;
+    int _maskSize;
+};
 #endif
