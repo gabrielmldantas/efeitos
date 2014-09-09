@@ -18,12 +18,6 @@ public:
     void apply(cv::Mat& image);
 };
 
-class Sepia : public Effect
-{
-public:
-    void apply(cv::Mat& image);
-};
-
 class Negative : public Effect
 {
 public:
@@ -45,7 +39,18 @@ public:
     FiltroMedia(int maskSize);
     void apply(cv::Mat& image);
 private:
-    float _multiplier;
     int _maskSize;
+    int _center;
+    float _multiplier;
 };
+
+class Bright : public Effect
+{
+public:
+    Bright(float factor);
+    void apply(cv::Mat& image);
+private:
+    float _factor;
+};
+
 #endif

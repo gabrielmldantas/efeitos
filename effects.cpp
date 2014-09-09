@@ -1,6 +1,8 @@
 #include "effects.h"
 #include <cstdlib>
 #include <cmath>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <iostream>
 
 using namespace cv;
 
@@ -21,23 +23,6 @@ void Grayscale::apply(Mat& image)
         pixel.val[0] = c;
         pixel.val[1] = c;
         pixel.val[2] = c;
-    };
-    traverse(image, f);
-}
-
-void Sepia::apply(Mat& image)
-{
-    auto f = [](Mat& image, int i, int j) {
-        Vec3b &pixel = image.at<Vec3b>(i, j);
-        int red = pixel.val[2] * 0.393 + pixel.val[1] * 0.769 + pixel.val[0] * 0.189;
-        int green = pixel.val[2] * 0.349 + pixel.val[1] * 0.686 + pixel.val[0] * 0.168;
-        int blue = pixel.val[2] * 0.272 + pixel.val[1] * 0.534 + pixel.val[0] * 0.131;
-        if (red > 255) red = 255;
-        if (green > 255) green = 255;
-        if (blue > 255) blue = 255;
-        pixel.val[0] = blue;
-        pixel.val[1] = green;
-        pixel.val[2] = red;
     };
     traverse(image, f);
 }
@@ -72,7 +57,7 @@ void Threshold::apply(Mat& image)
 }
 
 FiltroMedia::FiltroMedia(int maskSize)
-    : _maskSize(maskSize), _multiplier(1/(pow(maskSize, 2)))
+    : _maskSize(maskSize), _center(floor(maskSize / 2)), _multiplier(1 / (maskSize * maskSize))
 {
 }
 
@@ -80,23 +65,36 @@ void FiltroMedia::apply(Mat& image)
 {
     auto f = [this](Mat& image, int i, int j) {
         Vec3b &pixel = image.at<Vec3b>(i, j);
-        int center = floor(_maskSize / 2);
         Size imageSize = image.size();
         Vec3f resultado(0, 0, 0);
-        for (int k = i - center; k < i + center; k++) {
+        for (int k = i - _center; k <= i + _center; k++) {
             if (k < 0 || k >= imageSize.height) continue;
-            for (int w = j - center; w < j + center; w++) {
+            for (int w = j - _center; w <= j + _center; w++) {
                 if (w < 0 || w >= imageSize.width) continue;
                 Vec3b& vizinho = image.at<Vec3b>(k, w);
-                resultado.val[0] += vizinho.val[0] * _multiplier;
-                resultado.val[1] += vizinho.val[1] * _multiplier;
-                resultado.val[2] += vizinho.val[2] * _multiplier; 
+                resultado.val[0] += vizinho.val[0];
+                resultado.val[1] += vizinho.val[1];
+                resultado.val[2] += vizinho.val[2]; 
             }
         }
-        pixel.val[0] = round(resultado.val[0]);
-        pixel.val[1] = round(resultado.val[1]);
-        pixel.val[2] = round(resultado.val[2]);
+        pixel.val[0] = saturate_cast<uchar>(resultado.val[0] * _multiplier);
+        pixel.val[1] = saturate_cast<uchar>(resultado.val[1] * _multiplier);
+        pixel.val[2] = saturate_cast<uchar>(resultado.val[2] * _multiplier);
     };
     traverse(image, f);
 }
 
+Bright::Bright(float factor)
+    : _factor(factor)
+{}
+
+void Bright::apply(Mat& image)
+{
+    auto f = [this](Mat& image, int i, int j) {
+        Vec3b &pixel = image.at<Vec3b>(i, j);
+        pixel.val[0] = saturate_cast<uchar>(pixel.val[0] * _factor);
+        pixel.val[1] = saturate_cast<uchar>(pixel.val[1] * _factor);
+        pixel.val[2] = saturate_cast<uchar>(pixel.val[2] * _factor);
+    };
+    traverse(image, f);
+}
