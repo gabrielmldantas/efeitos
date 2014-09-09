@@ -57,7 +57,7 @@ void Threshold::apply(Mat& image)
 }
 
 FiltroMedia::FiltroMedia(int maskSize)
-    : _maskSize(maskSize), _center(floor(maskSize / 2)), _multiplier(1 / (maskSize * maskSize))
+    : _maskSize(maskSize), _center(floor(maskSize / 2.0)), _multiplier(1.0 / (maskSize * maskSize))
 {
 }
 

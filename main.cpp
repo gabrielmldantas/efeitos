@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
     Mat image;
     int frame = 0;
     Grayscale *g = new Grayscale;
-    FiltroMedia *media = new FiltroMedia(11);
+    FiltroMedia *media = new FiltroMedia(3);
     while (v.read(image)) {
         frame++;
         //for_each(effects.begin(), effects.end(), [&image](Effect* effect) { effect->apply(image); });
